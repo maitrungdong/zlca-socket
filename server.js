@@ -1,4 +1,5 @@
 import { Server } from 'socket.io'
+import { socketEvents } from './src/utils/constants.js'
 
 const io = new Server(8888, {
   cors: {
@@ -22,28 +23,28 @@ const getUser = (userId) => {
 }
 
 io.on('connection', (socket) => {
-  //When an user connected
-  console.log(`An user connected.`)
+  //When a user connected
+  console.log(`A user connected.`)
   io.emit(
     'welcome',
     'Hello, welcome to use socket.io and your id: ' + socket.id
   )
 
   //Take userId and socketId from user
-  socket.on('addUserEvent', (userId) => {
+  socket.on(socketEvents.ADD_NEW_USER, (userId) => {
     console.log(`Hello user with id: ${userId} ${socket.id}`)
     addUser(userId, socket.id)
     console.log({ usersOnline: users })
   })
 
   //Send and get messages
-  socket.on('sendMessageEvent', ({ senderId, receiverId, message }) => {
+  socket.on(socketEvents.SEND_MESSAGE, ({ senderId, receiverId, message }) => {
     console.log({ senderId, receiverId, message })
     console.log({ users: users })
     const user = getUser(receiverId)
     if (user) {
-      console.log(`CHECK RECEVIER: ${user.userId} ${user.socketId}`)
-      io.to(user.socketId).emit('getMessageEvent', {
+      console.log(`CHECK RECEIVER: ${user.userId} ${user.socketId}`)
+      io.to(user.socketId).emit(socketEvents.GET_MESSAGE, {
         message,
       })
     }
@@ -51,7 +52,7 @@ io.on('connection', (socket) => {
 
   //When an user disconnected
   socket.on('disconnect', () => {
-    console.log(`An user disconnected: ${socket.id}`)
+    console.log(`A user disconnected: ${socket.id}`)
     removeUser(socket.id)
   })
 })
