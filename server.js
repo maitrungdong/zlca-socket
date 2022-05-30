@@ -25,6 +25,7 @@ const getUser = (userId) => {
 io.on('connection', (socket) => {
   //When a user connected
   console.log(`A user connected.`)
+  console.log({ socketId: socket.id })
   io.emit(
     'welcome',
     'Hello, welcome to use socket.io and your id: ' + socket.id
@@ -46,6 +47,17 @@ io.on('connection', (socket) => {
       console.log(`CHECK RECEIVER: ${user.userId} ${user.socketId}`)
       io.to(user.socketId).emit(socketEvents.GET_MESSAGE, {
         message,
+      })
+    }
+  })
+
+  socket.on(socketEvents.CREATE_CONVER, ({ conversation, receiverId }) => {
+    const user = getUser(receiverId)
+    console.log({ conversation })
+    console.log({ user })
+    if (user) {
+      io.to(user.socketId).emit(socketEvents.GET_CONVER, {
+        arrivalConver: conversation,
       })
     }
   })
